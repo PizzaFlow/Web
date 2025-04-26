@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #FF5234, #FF8C00);
+      overflow: hidden;
+    }
+
+    .register-container {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      padding: 40px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .register-container h2 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .register-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .register-form label {
+      font-size: 16px;
+      color: #555;
+      text-align: left;
+    }
+
+    .register-form input {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .register-form input:focus {
+      outline: none;
+      border-color: #FF5234;
+    }
+
+    .register-form button {
+      background-color: #FF5234;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .register-form button:hover {
+      background-color: #e24e00;
+    }
+
+    .login-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .login-link a {
+      color: #FF5234;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h2>Регистрация</h2>
+    <div id="registerError" class="error"></div>
+    <div class="register-form">
+      <label for="registerEmail">Email</label>
+      <input type="email" id="registerEmail" placeholder="Введите email" required>
+      <label for="registerPassword">Пароль</label>
+      <input type="password" id="registerPassword" placeholder="Введите пароль" required>
+      <button id="registerButton">Зарегистрироваться</button>
+    </div>
+    <div class="login-link">
+      Уже есть аккаунт? <a href="login.html">Войти</a>
+    </div>
+  </div>
+
+  <script src="../static/js/ApiClient.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const api = new ApiClient();
+      const registerButton = document.getElementById('registerButton');
+      const registerError = document.getElementById('registerError');
+
+      registerButton.addEventListener('click', () => {
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+
+        if (!email || !password) {
+          registerError.textContent = 'Пожалуйста, заполните все поля';
+          registerError.style.display = 'block';
+          return;
+        }
+
+        api.register(email, password, (success, error) => {
+          if (success) {
+            alert('Регистрация успешна! Теперь вы можете войти.');
+            window.location.href = 'login.html'; // Перенаправляем на страницу входа
+          } else {
+            if (error.includes('CORS')) {
+              registerError.textContent = 'Ошибка: сервер не настроен для CORS. Проверьте настройки бэкенда.';
+            } else if (error.includes('500')) {
+              registerError.textContent = 'Ошибка сервера (500). Проверьте логи бэкенда.';
+            } else {
+              registerError.textContent = error || 'Ошибка регистрации';
+            }
+            registerError.style.display = 'block';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
