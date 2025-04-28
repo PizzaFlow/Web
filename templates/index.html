@@ -8,6 +8,9 @@
 </head>
 <body>
   <div class="container">
+    <div class="header-actions">
+      <button id="registerBtn" class="register-button">Регистрация</button>
+    </div>
     <h1>Меню Пиццы</h1>
     <div id="pizzaContainer" class="pizza-container"></div>
   </div>
@@ -32,5 +35,14 @@
 
   <script src="../static/js/script.js"></script>
   <script src="../static/js/ApiClient.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const registerBtn = document.getElementById('registerBtn');
+      
+      registerBtn.addEventListener('click', () => {
+        window.location.href = 'register.html'; // Перенаправляем на страницу регистрации
+      });
+    });
+  </script>
 </body>
 </html>
