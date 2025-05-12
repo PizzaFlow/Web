@@ -10,12 +10,13 @@
   <div class="container">
     <div class="header-actions">
       <button id="registerBtn" class="register-button">Регистрация</button>
+      <button id="cartBtn" class="cart-button">Корзина</button>
     </div>
     <h1>Меню Пиццы</h1>
     <div id="pizzaContainer" class="pizza-container"></div>
   </div>
 
-  <!-- Modal Structure -->
+  <!-- Modal Structure for Pizza -->
   <div id="pizzaModal" class="modal">
     <div class="modal-content">
       <span class="close">×</span>
@@ -26,9 +27,34 @@
         <div class="modal-details">
           <h2 id="modalPizzaName"></h2>
           <p id="modalPizzaDescription"></p>
-          <h3>Ингредиенты</h3>
-          <div id="ingredientsList" class="ingredients-list"></div>
+          <button id="selectIngredientsBtn" class="select-ingredients-button">Выбрать ингредиенты</button>
+          <div id="modalPizzaPrice" class="modal-price">0 ₽</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Structure for Ingredients -->
+  <div id="ingredientsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">×</span>
+      <div class="modal-body">
+        <h3>Выберите ингредиенты</h3>
+        <div id="ingredientsList" class="ingredients-list"></div>
+        <button id="saveIngredientsBtn" class="save-ingredients-button">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Structure for Cart -->
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <span class="close">×</span>
+      <div class="modal-body">
+        <h3>Корзина</h3>
+        <div id="cartItems" class="cart-items"></div>
+        <div id="cartTotal" class="modal-price">Итого: 0 ₽</div>
+        <button id="clearCartBtn" class="cart-button">Очистить корзину</button>
       </div>
     </div>
   </div>
@@ -38,11 +64,17 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const registerBtn = document.getElementById('registerBtn');
+      const cartBtn = document.getElementById('cartBtn');
       
       registerBtn.addEventListener('click', () => {
         window.location.href = 'register.html'; // Перенаправляем на страницу регистрации
       });
+
+      cartBtn.addEventListener('click', () => {
+        const cartModal = document.getElementById('cartModal');
+        cartModal.style.display = 'block';
+      });
     });
   </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93e44a68aa17bce9',t:'MTc0Njk5MzkyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

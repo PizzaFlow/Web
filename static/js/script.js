@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   const pizzaContainer = document.getElementById('pizzaContainer');
-  const modal = document.getElementById('pizzaModal');
-  const closeModal = document.querySelector('.modal .close');
+  const pizzaModal = document.getElementById('pizzaModal');
+  const ingredientsModal = document.getElementById('ingredientsModal');
+  const closePizzaModal = pizzaModal.querySelector('.close');
+  const closeIngredientsModal = ingredientsModal.querySelector('.close');
   const API_BASE_URL = 'http://localhost:8000';
   const PIZZAS_ENDPOINT = '/pizzas';
   const INGREDIENTS_ENDPOINT = '/ingredients';
@@ -10,21 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let ingredients = [];
   let selectedPizza = null;
-  let selectedSize = 30; // По умолчанию 30 см
-  let selectedDough = 'traditional'; // По умолчанию традиционное тесто
+  let selectedSize = 30;
+  let selectedDough = 'traditional';
   let totalPrice = 0;
+  let selectedIngredients = [];
+  let cart = []; // Временная корзина в памяти
 
   // Проверка на наличие необходимых элементов
-  if (!pizzaContainer) {
-    console.error('Элемент с id="pizzaContainer" не найден');
-    return;
-  }
-  if (!modal) {
-    console.error('Элемент с id="pizzaModal" не найден');
-    return;
-  }
-  if (!closeModal) {
-    console.error('Элемент с классом ".modal .close" не найден');
+  if (!pizzaContainer || !pizzaModal || !ingredientsModal || !closePizzaModal || !closeIngredientsModal) {
+    console.error('Не найдены необходимые элементы DOM');
     return;
   }
 
@@ -79,22 +75,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     card.querySelector('button').addEventListener('click', () => {
       selectedPizza = pizza;
-      totalPrice = pizza.price; // Инициализируем цену
-      openModal(pizza);
+      totalPrice = pizza.price;
+      selectedIngredients = [];
+      openPizzaModal(pizza);
     });
   
     return card;
   }
 
-  // Функция для открытия модального окна
-  function openModal(pizza) {
+  // Функция для открытия модального окна пиццы
+  function openPizzaModal(pizza) {
     const modalPizzaName = document.getElementById('modalPizzaName');
     const modalPizzaDescription = document.getElementById('modalPizzaDescription');
     const modalPizzaImage = document.getElementById('modalPizzaImage');
-    const ingredientsList = document.getElementById('ingredientsList');
+    const modalPizzaPrice = document.getElementById('modalPizzaPrice');
+    const selectIngredientsBtn = document.getElementById('selectIngredientsBtn');
 
-    if (!modalPizzaName || !modalPizzaDescription || !modalPizzaImage || !ingredientsList) {
-      console.error('Не найдены элементы модального окна (modalPizzaName, modalPizzaDescription, modalPizzaImage, ingredientsList)');
+    if (!modalPizzaName || !modalPizzaDescription || !modalPizzaImage || !modalPizzaPrice || !selectIngredientsBtn) {
+      console.error('Не найдены элементы модального окна пиццы');
       return;
     }
 
@@ -102,6 +100,23 @@ document.addEventListener('DOMContentLoaded', () => {
     modalPizzaDescription.textContent = pizza.description;
     modalPizzaImage.src = pizza.photo || '';
     updatePrice();
+
+    selectIngredientsBtn.addEventListener('click', () => {
+      openIngredientsModal();
+    }, { once: true });
+
+    pizzaModal.style.display = 'block';
+  }
+
+  // Функция для открытия модального окна ингредиентов
+  function openIngredientsModal() {
+    const ingredientsList = document.getElementById('ingredientsList');
+    const saveIngredientsBtn = document.getElementById('saveIngredientsBtn');
+
+    if (!ingredientsList || !saveIngredientsBtn) {
+      console.error('Не найдены элементы модального окна ингредиентов');
+      return;
+    }
 
     ingredientsList.innerHTML = '';
 
@@ -112,13 +127,32 @@ document.addEventListener('DOMContentLoaded', () => {
         <img src="${ingredient.photo}" alt="${ingredient.name}">
         <span>${ingredient.name}</span>
         <span>${ingredient.price} ₽</span>
-        <input type="checkbox" data-price="${ingredient.price}" data-id="${ingredient.id}">
+        <input type="checkbox" data-price="${ingredient.price}" data-id="${ingredient.id}" ${selectedIngredients.some(i => i.id === ingredient.id) ? 'checked' : ''}>
       `;
-      ingredientDiv.querySelector('input').addEventListener('change', updatePrice);
+      ingredientDiv.querySelector('input').addEventListener('change', () => {
+        updateSelectedIngredients();
+        updatePrice();
+      });
       ingredientsList.appendChild(ingredientDiv);
     });
 
-    modal.style.display = 'block';
+    saveIngredientsBtn.addEventListener('click', () => {
+      // Закрываем оба модальных окна
+      ingredientsModal.style.display = 'none';
+      pizzaModal.style.display = 'none';
+      // Добавляем пиццу в корзину
+      addToCart();
+    }, { once: true });
+
+    ingredientsModal.style.display = 'block';
+  }
+
+  // Функция для обновления выбранных ингредиентов
+  function updateSelectedIngredients() {
+    selectedIngredients = Array.from(document.querySelectorAll('.ingredient-item input:checked')).map(input => ({
+      id: input.dataset.id,
+      price: parseInt(input.dataset.price)
+    }));
   }
 
   // Функция для обновления цены
@@ -127,34 +161,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let price = selectedPizza.price;
 
-    // Учитываем размер
-    if (selectedSize === 25) price -= 100; // Пример: -100 ₽ за 25 см
-    if (selectedSize === 35) price += 100; // Пример: +100 ₽ за 35 см
+    if (selectedSize === 25) price -= 100;
+    if (selectedSize === 35) price += 100;
 
-   
-
-    // Учитываем дополнительные ингредиенты
-    const selectedIngredients = document.querySelectorAll('.ingredient-item input:checked');
     selectedIngredients.forEach(ingredient => {
-      price += parseInt(ingredient.dataset.price);
+      price += ingredient.price;
     });
 
     totalPrice = price;
     const modalPizzaPrice = document.getElementById('modalPizzaPrice');
     if (modalPizzaPrice) {
-      modalPizzaPrice.textContent = totalPrice;
+      modalPizzaPrice.textContent = `${totalPrice} ₽`;
     }
   }
 
-  // Обработчик закрытия модального окна
-  closeModal.addEventListener('click', () => {
-    modal.style.display = 'none';
+  // Функция для добавления в корзину
+  function addToCart() {
+    const cartItem = {
+      pizza: selectedPizza.name,
+      price: totalPrice,
+      ingredients: selectedIngredients.map(ing => ({
+        name: ingredients.find(i => i.id === ing.id).name,
+        price: ing.price
+      })),
+      size: selectedSize,
+      dough: selectedDough
+    };
+    cart.push(cartItem);
+    console.log('Добавлено в корзину:', cartItem);
+    alert(`Пицца "${selectedPizza.name}" добавлена в корзину за ${totalPrice} ₽!`);
+  }
+
+  // Обработчик закрытия модального окна пиццы
+  closePizzaModal.addEventListener('click', () => {
+    pizzaModal.style.display = 'none';
   });
 
-  // Закрытие модального окна при клике вне его
+  // Обработчик закрытия модального окна ингредиентов
+  closeIngredientsModal.addEventListener('click', () => {
+    ingredientsModal.style.display = 'none';
+  });
+
+  // Закрытие модальных окон при клике вне их
   window.addEventListener('click', (event) => {
-    if (event.target === modal) {
-      modal.style.display = 'none';
+    if (event.target === pizzaModal) {
+      pizzaModal.style.display = 'none';
+    }
+    if (event.target === ingredientsModal) {
+      ingredientsModal.style.display = 'none';
     }
   });
 });
