@@ -18,7 +18,7 @@
   <!-- Modal Structure -->
   <div id="pizzaModal" class="modal">
     <div class="modal-content">
-      <span class="close">×</span>
+      <span class="close"></span>
       <div class="modal-body">
         <div class="modal-image">
           <img id="modalPizzaImage" src="" alt="Pizza Image">
@@ -45,4 +45,26 @@
     });
   </script>
 </body>
-</html>
+```html
+<!-- Add a loading animation to the pizza container -->
+<div id="pizzaContainer" class="pizza-container">
+  <div class="loading-animation" id="loadingAnimation">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Add JavaScript code to handle loading animation -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const pizzaContainer = document.getElementById('pizzaContainer');
+    const loadingAnimation = document.getElementById('loadingAnimation');
+
+    // Hide loading animation after 2 seconds
+    setTimeout(() => {
+      loadingAnimation.style.display = 'none';
+    }, 2000);
+  });
+</script>
+```</html>
