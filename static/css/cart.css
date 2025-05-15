@@ -1,0 +1,124 @@
+.cart-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: -100%; /* Используем процент, чтобы панель полностью скрывалась */
+    width: 33.33%; /* Треть ширины экрана */
+    min-width: 300px; /* Минимальная ширина для маленьких экранов */
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    z-index: 1001; /* Увеличиваем z-index, чтобы быть выше оверлея */
+    transition: right 0.3s ease;
+    overflow-y: auto;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный серый фон */
+    z-index: 1000; /* Ниже корзины, но выше остального контента */
+}
+  
+.overlay.active {
+    display: block;
+}
+  
+
+  
+.cart-modal.open {
+    display: block;
+    right: 0;
+}
+  
+  .cart-content {
+    padding: 20px;
+    position: relative;
+  }
+  
+  .cart-content .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #FF5234 #f1f1f1;
+  }
+  
+  .cart-items::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .cart-items::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .cart-items::-webkit-scrollbar-thumb {
+    background-color: #FF5234;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cart-items::-webkit-scrollbar-thumb:hover {
+    background-color: #e24e00;
+  }
+  
+  .cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  
+  .cart-item button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .cart-item button:hover {
+    background-color: #c0392b;
+  }
+  
+  .cart-total {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 15px 0;
+    text-align: right;
+  }
+  
+  .cart-button {
+    background-color: #FF5234;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px; /* Уменьшаем padding по горизонтали */
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-left: 10px;
+  }
+  
+  .cart-button:hover {
+    background-color: #e24e00;
+  }
