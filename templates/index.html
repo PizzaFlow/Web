@@ -10,12 +10,22 @@
 <body>
   <div id="overlay" class="overlay"></div>
   <div class="container">
-    <div class="header-actions">
-      <button id="registerBtn" class="register-button">Регистрация</button>
-      <button id="cartBtn" class="cart-button">Корзина</button>
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="pizzas.html" class="nav-item">Пиццы</a></li>
+        <li><a href="addresses.html" class="nav-item">Адреса</a></li>
+        <li><a href="map.html" class="nav-item">Карта</a></li>
+        <li><a href="orders.html" class="nav-item">Мои заказы</a></li>
+        <li><a href="favorite.html" class="nav-item">Любимые пиццы</a></li>
+      </ul>
+      <div class="header-actions">
+        <button id="profileBtn" class="profile-button"></button>
+        <button id="cartBtn" class="cart-button">Корзина</button>
+      </div>
+    </nav>
+    <div id="content" class="content">
+      <!-- Контент будет загружаться динамически или через навигацию -->
     </div>
-    <h1>Меню Пиццы</h1>
-    <div id="pizzaContainer" class="pizza-container"></div>
   </div>
 
   <!-- Modal Structure for Pizza -->
@@ -47,9 +57,15 @@
     <div class="cart-content">
       <span class="close">×</span>
       <h3>Корзина</h3>
+      <div class="cart-header">
+        <span id="cartCount">0 товара</span>
+        <span id="cartTotalHeader">на 0 ₽</span>
+      </div>
       <div id="cartItems" class="cart-items"></div>
-      <div id="cartTotal" class="cart-total">Итого: 0 ₽</div>
-      <button id="clearCartBtn" class="cart-button">Очистить корзину</button>
+      <div class="cart-footer">
+        <div class="cart-total">Сумма заказа: <span id="cartTotal">0 ₽</span></div>
+        <button id="checkoutBtn" class="checkout-button">К оформлению заказа</button>
+      </div>
     </div>
   </div>
 
@@ -58,11 +74,25 @@
   <script src="../static/js/cart.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const registerBtn = document.getElementById('registerBtn');
+      const api = new ApiClient();
+      const profileBtn = document.getElementById('profileBtn');
       const cartBtn = document.getElementById('cartBtn');
-      
-      registerBtn.addEventListener('click', () => {
-        window.location.href = 'register.html';
+
+      // Проверка авторизации пользователя
+      api.fetchCurrentUser((err, user) => {
+        if (!err && user) {
+          profileBtn.textContent = 'Профиль';
+          profileBtn.className = 'profile-button';
+          profileBtn.addEventListener('click', () => {
+            window.location.href = 'profile.html';
+          });
+        } else {
+          profileBtn.textContent = 'Регистрация';
+          profileBtn.className = 'register-button';
+          profileBtn.addEventListener('click', () => {
+            window.location.href = 'register.html';
+          });
+        }
       });
 
       cartBtn.addEventListener('click', () => {

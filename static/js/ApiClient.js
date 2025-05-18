@@ -1,236 +1,100 @@
 class ApiClient {
-    constructor(baseURL = 'http://localhost:8000') {
-      this.baseURL = baseURL;
-      this.token = localStorage.getItem('authToken') || null;
-      this.pizzas = [];
-      this.ingredients = [];
-      this.favoritePizzas = [];
-      this.pizzaIngredients = [];
-      this.addresses = [];
-      this.orders = [];
-      this.selectedAddress = null;
-      this.currentOrder = null;
-      this.currentUser = null;
-      this.fetchAddresses(); // Инициализация адресов, как в Swift
+  constructor(baseURL = 'http://localhost:8000') {
+    this.baseURL = baseURL;
+    this.token = localStorage.getItem('authToken') || null;
+  }
+
+  // Вспомогательный метод для выполнения запросов
+  async request(endpoint, method = 'GET', body = null, headers = {}) {
+    const url = `${this.baseURL}${endpoint}`;
+    const options = {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+      body: body ? JSON.stringify(body) : null,
+    };
+
+    if (this.token) {
+      options.headers['Authorization'] = `Bearer ${this.token}`;
     }
-  
-    // Вспомогательный метод для выполнения запросов
-    async request(endpoint, method = 'GET', body = null, headers = {}) {
-      const url = `${this.baseURL}${endpoint}`;
-      const options = {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers,
-        },
-        body: body ? JSON.stringify(body) : null,
-      };
-  
-      if (this.token) {
-        options.headers['Authorization'] = `Bearer ${this.token}`;
+
+    try {
+      console.log(`Отправка запроса: ${method} ${url}`, options);
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Ошибка сервера: ${response.status}, Текст: ${errorText}`);
       }
-  
-      try {
-        console.log(`Отправка запроса: ${method} ${url}`, options);
-        const response = await fetch(url, options);
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Ошибка сервера: ${response.status}, Текст: ${errorText}`);
-        }
-        return await response.json();
-      } catch (error) {
-        if (error.message.includes('Failed to fetch')) {
-          console.error('Возможная проблема с CORS или сервер недоступен:', url);
-          throw new Error('Не удалось выполнить запрос. Проверьте, что сервер запущен и настроен CORS для http://127.0.0.1:5500');
-        }
-        console.error(`Ошибка при запросе к ${url}:`, error);
-        throw error;
+      return await response.json();
+    } catch (error) {
+      if (error.message.includes('Failed to fetch')) {
+        console.error('Возможная проблема с CORS или сервер недоступен:', url);
+        throw new Error('Не удалось выполнить запрос. Проверьте, что сервер запущен и настроен CORS для http://127.0.0.1:5500');
       }
-    }
-  
-    // Получение списка пицц (необходимо для index.html)
-    async fetchPizzas() {
-      console.log("🔄 Вызван fetchPizzas()");
-      const data = await this.request('/pizzas');
-      this.pizzas = data;
-      console.log(`✅ Загружено ${this.pizzas.length} пицц`);
-      return data;
-    }
-  
-    // Перемещение пиццы в начало списка
-    movePizzaToTop(pizza) {
-      this.pizzas = this.pizzas.filter(p => p.id !== pizza.id);
-      this.pizzas.unshift(pizza);
-    }
-  
-    // Перемещение пиццы из избранного в основной список
-    movePizzaToMainList(pizza) {
-      this.favoritePizzas = this.favoritePizzas.filter(p => p.id !== pizza.id);
-      this.pizzas.push(pizza);
-    }
-  
-    // Получение списка заказов
-    async fetchOrders() {
-      if (!this.token) throw new Error('Токен отсутствует');
-      const data = await this.request('/users/orders/');
-      this.orders = data;
-      return data;
-    }
-  
-    // Получение списка адресов
-    async fetchAddresses() {
-      if (!this.token) return;
-      const data = await this.request('/users/address/');
-      this.addresses = data;
-      if (!this.selectedAddress && data.length > 0) {
-        this.selectedAddress = data[0];
-      }
-      console.log("Полученные адреса:", data);
-      return data;
-    }
-  
-    // Добавление нового адреса
-    async addAddress(city, street, house, apartment, callback) {
-      if (!this.token) {
-        callback(false, "Нет токена");
-        return;
-      }
-      const addressData = { city, street, house, apartment };
-      try {
-        await this.request('/users/address/', 'POST', addressData);
-        console.log("✅ Адрес успешно добавлен!");
-        await this.fetchAddresses();
-        callback(true, null);
-      } catch (error) {
-        callback(false, error.message);
-      }
-    }
-  
-    // Удаление адреса
-    async deleteAddress(addressID) {
-      if (!this.token) throw new Error('Токен отсутствует');
-      await this.request(`/users/address/${addressID}`, 'DELETE');
-      this.addresses = this.addresses.filter(addr => addr.id !== addressID);
-      console.log("✅ Адрес успешно удалён!");
-    }
-  
-    // Создание заказа
-    async createOrder(orderData) {
-      if (!this.token) throw new Error('Токен отсутствует');
-      const data = await this.request('/orders/', 'POST', orderData);
-      this.currentOrder = data;
-      return data;
-    }
-  
-    // Получение списка ингредиентов
-    async fetchAllIngredients() {
-      const data = await this.request('/ingredients');
-      this.ingredients = data;
-      return data;
-    }
-  
-    // Получение избранных пицц
-    async fetchFavoritePizzas(callback) {
-      if (!this.token) {
-        callback(false, "Токен отсутствует");
-        return;
-      }
-      try {
-        const data = await this.request('/users/favorite-pizzas/');
-        this.favoritePizzas = data;
-        callback(true, null);
-      } catch (error) {
-        callback(false, error.message);
-      }
-    }
-  
-    // Получение времени доставки
-    async fetchDeliveryTimes() {
-      if (!this.token) throw new Error('Токен отсутствует');
-      return await this.request('/orders/delivery-times/');
-    }
-  
-    // Добавление пиццы в избранное
-    async addPizzaToFavorites(pizzaID, callback) {
-      if (!this.token) throw new Error('Токен отсутствует');
-      await this.request(`/users/favorite-pizzas/${pizzaID}`, 'POST');
-      this.fetchFavoritePizzas(callback);
-    }
-  
-    // Удаление пиццы из избранного
-    async removePizzaFromFavorites(pizzaID, callback) {
-      if (!this.token) throw new Error('Токен отсутствует');
-      await this.request(`/users/favorite-pizzas/${pizzaID}`, 'DELETE');
-      callback(true, null);
-    }
-  
-    // Регистрация пользователя
-    async register(email, password, callback) {
-      try {
-        const data = await this.request('/auth/register', 'POST', { email, password });
-        this.currentUser = { id: 0, username: "", phone_number: "", email: "" };
-        callback(true, null);
-      } catch (error) {
-        callback(false, error.message);
-      }
-    }
-  
-    // Обновление профиля пользователя
-    async updateUserProfile({ username, phoneNumber, currentPassword, newPassword }) {
-      if (!this.token) throw new Error('Токен отсутствует');
-      const requestBody = {};
-      if (username) requestBody.username = username;
-      if (phoneNumber) requestBody.phone_number = phoneNumber;
-      if (newPassword) {
-        requestBody.current_password = currentPassword;
-        requestBody.new_password = newPassword;
-      }
-      const data = await this.request('/users/me', 'PATCH', requestBody);
-      this.currentUser = data;
-      return data;
-    }
-  
-    // Получение текущего пользователя
-    async fetchCurrentUser(callback) {
-      if (!this.token) {
-        callback(new Error('Токен отсутствует'));
-        return;
-      }
-      try {
-        const data = await this.request('/users/me');
-        this.currentUser = data;
-        callback(null, data);
-      } catch (error) {
-        callback(error);
-      }
-    }
-  
-    // Вход в систему
-    async login(email, password, callback) {
-      try {
-        const data = await this.request('/auth/login', 'POST', { email, password });
-        this.token = data.access_token;
-        localStorage.setItem('authToken', this.token);
-        await this.fetchCurrentUser((err, user) => {
-          if (err) callback(false, err.message);
-          else callback(true, null);
-        });
-      } catch (error) {
-        callback(false, error.message);
-      }
-    }
-  
-    // Выход из системы
-    logout() {
-      this.token = null;
-      this.currentUser = null;
-      localStorage.removeItem('authToken');
-    }
-  
-    // Проверка пароля
-    async verifyPassword(password) {
-      if (!this.token) throw new Error('Токен отсутствует');
-      const data = await this.request('/auth/verify-password', 'POST', { password });
-      return data.isValid;
+      console.error(`Ошибка при запросе к ${url}:`, error);
+      throw error;
     }
   }
+
+  // Регистрация пользователя
+  async register(email, password, callback) {
+    try {
+      const data = await this.request('/auth/register', 'POST', { email, password });
+      callback(true, null);
+    } catch (error) {
+      callback(false, error.message);
+    }
+  }
+
+  // Вход в систему
+  async login(email, password, callback) {
+    try {
+      const data = await this.request('/auth/login', 'POST', { email, password });
+      this.token = data.access_token;
+      localStorage.setItem('authToken', this.token);
+      callback(true, null);
+    } catch (error) {
+      callback(false, error.message);
+    }
+  }
+
+  // Выход из системы
+  logout() {
+    this.token = null;
+    localStorage.removeItem('authToken');
+  }
+
+  // Получение текущего пользователя
+  async fetchCurrentUser(callback) {
+    if (!this.token) {
+      callback(new Error('Токен отсутствует'));
+      return;
+    }
+    try {
+      const data = await this.request('/users/me');
+      callback(null, data); 
+    } catch (error) {
+      callback(error);
+    }
+  }
+
+  // Обновление профиля пользователя
+  async updateUserProfile({ username, password, phone_number }, callback) {
+    if (!this.token) {
+      callback(new Error('Токен отсутствует'));
+      return;
+    }
+    const requestBody = {};
+    if (username) requestBody.username = username;
+    if (password) requestBody.password = password;
+    if (phone_number) requestBody.phone_number = phone_number;
+    try {
+      const data = await this.request('/users/me', 'PATCH', requestBody);
+      callback(null, data);
+    } catch (error) {
+      callback(error);
+    }
+  }
+}

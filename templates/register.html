@@ -5,20 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Регистрация</title>
   <link rel="stylesheet" href="../static/css/auth.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <div class="register-container">
-    <h2>Регистрация</h2>
-    <div id="registerError" class="error"></div>
-    <div class="register-form">
-      <label for="registerEmail">Email</label>
-      <input type="email" id="registerEmail" placeholder="Введите email" required>
-      <label for="registerPassword">Пароль</label>
-      <input type="password" id="registerPassword" placeholder="Введите пароль" required>
-      <button id="registerButton">Зарегистрироваться</button>
+  <div class="auth-container">
+    <div class="theme-toggle">
+      <button id="themeToggleBtn" class="theme-toggle-button">
+        <i class="fas fa-sun"></i>
+      </button>
     </div>
-    <div class="login-link">
-      Уже есть аккаунт? <a href="login.html">Войти</a>
+    <div class="auth-card">
+      <h2>Регистрация</h2>
+      <div id="registerError" class="error"></div>
+      <div class="auth-form">
+        <div class="input-group">
+          <label for="registerEmail">Email</label>
+          <input type="email" id="registerEmail" placeholder="Введите email" required>
+        </div>
+        <div class="input-group">
+          <label for="registerPassword">Пароль</label>
+          <input type="password" id="registerPassword" placeholder="Введите пароль" required>
+          <button type="button" class="toggle-password" data-target="registerPassword">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <button id="registerButton" class="auth-button">Зарегистрироваться</button>
+      </div>
+      <div class="auth-link">
+        Уже есть аккаунт? <a href="login.html">Войти</a>
+      </div>
     </div>
   </div>
 
@@ -29,6 +44,46 @@
       const registerButton = document.getElementById('registerButton');
       const registerError = document.getElementById('registerError');
 
+      // Переключение темы
+      function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeButtonIcon(newTheme);
+      }
+
+      function updateThemeButtonIcon(theme) {
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        themeToggleBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+      }
+
+      // Инициализация темы
+      const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeButtonIcon(savedTheme);
+
+      document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+
+      // Показ/скрытие пароля
+      document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', () => {
+          const targetId = button.getAttribute('data-target');
+          const input = document.getElementById(targetId);
+          const icon = button.querySelector('i');
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+          } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+          }
+        });
+      });
+
+      // Логика регистрации
       registerButton.addEventListener('click', () => {
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
@@ -42,7 +97,7 @@
         api.register(email, password, (success, error) => {
           if (success) {
             alert('Регистрация успешна! Теперь вы можете войти.');
-            window.location.href = 'login.html'; // Перенаправляем на страницу входа
+            window.location.href = 'login.html';
           } else {
             if (error.includes('CORS')) {
               registerError.textContent = 'Ошибка: сервер не настроен для CORS. Проверьте настройки бэкенда.';

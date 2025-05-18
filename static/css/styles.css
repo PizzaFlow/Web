@@ -1,138 +1,329 @@
+/* styles.css */
+:root {
+  --primary-color: #ff6200;
+  --primary-dark: #e24e00;
+  --text-dark: #1a1a1a;
+  --text-light: #666;
+  --background-light: #ffffff;
+  --background-card: #ffffff;
+  --border-color: #e0e0e0;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Тёмная тема */
+:root[data-theme="dark"] {
+  --text-dark: #e0e0e0;
+  --text-light: #a0a0a0;
+  --background-light: #1e1e1e;
+  --background-card: #2a2a2a;
+  --border-color: #444;
+  --shadow-light: 0 2px 8px rgba(255, 255, 255, 0.05);
+  --shadow-medium: 0 4px 16px rgba(255, 255, 255, 0.1);
+}
+
+/* Переопределение для системного тёмного режима, если тема не выбрана вручную */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --text-dark: #e0e0e0;
+    --text-light: #a0a0a0;
+    --background-light: #1e1e1e;
+    --background-card: #2a2a2a;
+    --border-color: #444;
+    --shadow-light: 0 2px 8px rgba(255, 255, 255, 0.05);
+    --shadow-medium: 0 4px 16px rgba(255, 255, 255, 0.1);
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--background-light);
+  color: var(--text-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 .container {
+  position: relative;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 30px 20px;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.pizza-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-}
-
-.pizza-card {
-  border: 1px solid #FF5234;
+/* Навигационное меню */
+.nav-menu {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--background-card);
+  padding: 15px 25px;
   border-radius: 12px;
-  width: 250px;
-  padding: 16px;
-  text-align: center;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-  transition: transform 0.2s;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-color);
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 400px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.pizza-card-content {
-  flex: 1;
+.nav-menu ul {
   display: flex;
-  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.pizza-card:hover {
-  transform: translateY(-5px);
+.nav-menu li {
+  margin-right: 30px;
 }
 
-.pizza-card h3 {
-  margin: 10px 0;
-  font-size: 1.2rem;
-}
-
-.pizza-card img {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-.pizza-card .description {
-  font-size: 14px;
-  color: #555;
-  margin: 10px 0;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-
-.pizza-card .price {
+.nav-menu a {
+  text-decoration: none;
+  color: var(--text-light);
+  font-weight: 500;
   font-size: 16px;
-  font-weight: bold;
-  color: #FF5234;
-  margin: 10px 0;
+  transition: color 0.3s ease, transform 0.2s ease;
 }
 
-.pizza-card button {
-  background-color: #FF5234;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px;
+.nav-menu a:hover {
+  color: var(--primary-color);
+  transform: translateY(-1px);
+  display: inline-block;
+}
+
+.nav-menu a.active {
+  color: var(--primary-color);
+  font-weight: 600;
+  position: relative;
+}
+
+.nav-menu a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
   width: 100%;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.pizza-card button:hover {
-  background-color: #e24e00;
-}
-
-.error {
-  color: red;
-  text-align: center;
-  padding: 20px;
+  height: 2px;
+  background-color: var(--primary-color);
+  border-radius: 2px;
 }
 
 .header-actions {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
+  gap: 12px;
 }
 
-.register-button {
-  background-color: #FF5234;
-  color: white;
-  border: none;
-  border-radius: 6px;
+.profile-button, .cart-button, .register-button, .theme-toggle-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 20px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-  margin-left: 10px;
-}
-
-.register-button:hover {
-  background-color: #e24e00;
-}
-
-.cart-button {
-  background-color: #FF5234;
-  color: white;
   border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
+  border-radius: 10px;
+  background: var(--primary-color);
+  color: #ffffff;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-  margin-left: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: transform 0.2s ease, background 0.3s ease;
 }
 
-.cart-button:hover {
-  background-color: #e24e00;
+.theme-toggle-button {
+  background: #4e60ff;
 }
 
-/* Стили для модального окна */
+.profile-button:hover, .cart-button:hover, .register-button:hover, .theme-toggle-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.theme-toggle-button:hover {
+  background: #3a4bff;
+}
+
+/* Основной контент */
+.content {
+  padding: 0 10px;
+}
+
+.pizza-header {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.pizza-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+  text-align: center;
+}
+
+.pizza-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-button {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--background-card);
+  color: var(--text-light);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.filter-button:hover, .filter-button.active {
+  background: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+}
+
+/* Карточки пицц */
+.pizza-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.pizza-card {
+  background: var(--background-card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  transition: all 0.3s ease;
+  animation: slideIn 0.5s ease forwards;
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+.pizza-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-medium);
+}
+
+.pizza-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.pizza-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #f5f5f5;
+  color: var(--text-light);
+  font-size: 16px;
+}
+
+.pizza-card:hover .pizza-image img {
+  transform: scale(1.05);
+}
+
+.favorite-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--background-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.favorite-button:hover {
+  background: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+}
+
+.favorite-button i {
+  font-size: 18px;
+  color: var(--text-dark);
+}
+
+.favorite-button.favorited i {
+  color: var(--primary-color);
+}
+
+.pizza-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pizza-info h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.pizza-description {
+  font-size: 14px;
+  color: var(--text-light);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pizza-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px 16px;
+}
+
+.pizza-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.add-button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-button:hover {
+  background: var(--primary-dark);
+}
+
+/* Модальное окно пиццы */
 .modal {
   display: none;
   position: fixed;
@@ -140,117 +331,184 @@ h1 {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
+  overflow-y: auto;
+}
+
+.modal.open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-content {
-  background-color: #fff;
+  background: var(--background-card);
   border-radius: 12px;
-  padding: 20px;
-  max-width: 700px;
-  margin: 20px auto;
-  position: relative;
+  width: 90%;
+  max-width: 900px;
   max-height: 90vh;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-medium);
+  animation: modalFadeIn 0.3s ease;
+}
+
+.close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 24px;
+  color: var(--text-light);
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.3s ease;
+}
+
+.close:hover {
+  color: var(--primary-color);
 }
 
 .modal-body {
   display: flex;
-  flex-direction: row;
-  gap: 20px;
-  max-height: calc(90vh - 60px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #FF5234 #f1f1f1;
+  flex-direction: column;
 }
 
-.modal-body::-webkit-scrollbar {
-  width: 8px;
+@media (min-width: 768px) {
+  .modal-body {
+    flex-direction: row;
+    gap: 20px;
+  }
 }
 
-.modal-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+.modal-image {
+  width: 100%;
+  max-height: 400px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
 }
 
-.modal-body::-webkit-scrollbar-thumb {
-  background-color: #FF5234;
-  border-radius: 10px;
-  transition: background-color 0.3s ease;
+@media (min-width: 768px) {
+  .modal-image {
+    width: 50%;
+    max-height: none;
+    height: 400px;
+  }
 }
 
-.modal-body::-webkit-scrollbar-thumb:hover {
-  background-color: #e24e00;
+.modal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-height: 100%;
 }
 
 .modal-details {
-  flex: 1;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+  width: 100%;
 }
 
-.modal-details h2 {
-  font-size: 1.8rem;
-  margin: 0;
-  color: #333;
+@media (min-width: 768px) {
+  .modal-details {
+    width: 50%;
+  }
 }
 
-.modal-details p {
-  font-size: 1rem;
-  color: #666;
-  margin: 0;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.modal-description {
+  font-size: 15px;
+  color: var(--text-light);
+  line-height: 1.6;
 }
 
 .modal-ingredients h3 {
-  font-size: 1.2rem;
-  color: #333;
-  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 12px;
 }
 
 .ingredients-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.ingredients-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ingredients-list::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.ingredients-list::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
 }
 
 .ingredient-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 80px;
-  text-align: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.ingredient-item:hover {
+  border-color: var(--primary-color);
+}
+
+.ingredient-item.selected, 
+.ingredient-item.default-ingredient {
+  border-color: var(--primary-color);
+  background: rgba(255, 98, 0, 0.05);
 }
 
 .ingredient-item img {
   width: 60px;
   height: 60px;
+  border-radius: 50%;
   object-fit: cover;
-  border-radius: 5px;
-  border: 2px solid #FF5234;
+  border: 1px solid var(--border-color);
 }
 
-.ingredient-item .ingredient-info {
-  display: flex;
-  flex-direction: column;
-  margin-top: 5px;
+.ingredient-item span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dark);
+  text-align: center;
 }
 
-.ingredient-item .ingredient-info span {
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.ingredient-item .ingredient-price {
+.ingredient-price {
   font-weight: bold;
-  color: #FF5234;
-}
-
-.modal-image img {
-  max-width: 200px;
-  border-radius: 8px;
+  color: var(--primary-color);
+  font-size: 12px;
 }
 
 .modal-price-actions {
@@ -260,32 +518,184 @@ h1 {
   margin-top: 20px;
 }
 
+.price-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
 .modal-price {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #FF5234;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.weight {
+  font-size: 14px;
+  color: var(--text-light);
 }
 
 .add-to-cart-button {
-  background-color: #FF5234;
-  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  background: var(--primary-color);
+  color: #ffffff;
   border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .add-to-cart-button:hover {
-  background-color: #e24e00;
+  background: var(--primary-dark);
 }
 
-.close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 24px;
-  cursor: pointer;
-  color: #666;
+/* Состояния пустоты и ошибки */
+.empty-state, .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  border-radius: 12px;
+  background: var(--background-card);
+  box-shadow: var(--shadow-light);
+  margin-top: 20px;
+  grid-column: 1 / -1;
+  border: 1px solid var(--border-color);
+}
+
+.empty-state h3, .error-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 16px 0 8px;
+  color: var(--text-dark);
+}
+
+.empty-state p, .error-state p {
+  font-size: 15px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  max-width: 400px;
+}
+
+.empty-icon, .error-icon {
+  font-size: 48px;
+  color: var(--primary-color);
+}
+
+/* Уведомления */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  background: var(--primary-color);
+  color: #ffffff;
+  border-radius: 8px;
+  box-shadow: var(--shadow-medium);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1001;
+}
+
+.notification.show {
+  opacity: 1;
+}
+
+/* Анимации */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cartSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .modal-body {
+    flex-direction: column;
+  }
+  
+  .modal-image {
+    height: 300px;
+  }
+  
+  .pizza-container {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  
+  .nav-menu {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .nav-menu ul {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .pizza-card {
+    min-width: 0;
+  }
+  
+  .modal-content {
+    width: 95%;
+  }
+  
+  .modal-price-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .add-to-cart-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
