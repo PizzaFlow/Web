@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карта</title>
+  <link rel="stylesheet" href="../static/css/styles.css">
+  <link rel="stylesheet" href="../static/css/map.css">
+  <!-- Используем последнюю версию 2.1.x -->
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=139a41d7-5786-441f-847e-2e6043f1f01e&lang=ru_RU" type="text/javascript"></script>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="pizzas.html" class="nav-item">Пиццы</a></li>
+        <li><a href="addresses.html" class="nav-item">Адреса</a></li>
+        <li><a href="map.html" class="nav-item active">Карта</a></li>
+        <li><a href="orders.html" class="nav-item">Мои заказы</a></li>
+        <li><a href="favorites.html" class="nav-item">Любимые пиццы</a></li>
+      </ul>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="theme-toggle-button"><i class="fas fa-sun"></i> Тема</button>
+        <button id="profileBtn" class="profile-button"></button>
+        <button id="cartBtn" class="cart-button"><i class="fas fa-shopping-cart"></i> Корзина</button>
+      </div>
+    </nav>
+    <div id="content" class="content">
+      <div id="map" class="map"></div>
+      <div class="search-panel">
+        <input id="searchInput" type="text" placeholder="Введите адрес">
+        <div id="searchResults" class="search-results"></div>
+        <div class="address-form">
+          <h3>Добавить новый адрес</h3>
+          <input id="cityInput" type="text" placeholder="Город">
+          <input id="streetInput" type="text" placeholder="Улица">
+          <input id="houseInput" type="text" placeholder="Дом">
+          <input id="apartmentInput" type="text" placeholder="Квартира">
+          <button id="addAddressBtn" class="add-address-button">Добавить адрес</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/js/ApiClient.js"></script>
+  <script src="../static/js/map.js"></script>
+  <script>
+    // Функция переключения темы
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeButtonIcon(newTheme);
+      updateMapTheme(newTheme);
+    }
+
+    function updateThemeButtonIcon(theme) {
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-moon"></i> Тема' : '<i class="fas fa-sun"></i> Тема';
+    }
+
+    // Инициализация темы при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeButtonIcon(savedTheme);
+
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.addEventListener('click', toggleTheme);
+
+      const api = new ApiClient();
+      const profileBtn = document.getElementById('profileBtn');
+      const cartBtn = document.getElementById('cartBtn');
+      const ADDRESSES_ENDPOINT = '/users/address';
+
+      api.fetchCurrentUser(function (err, user) {
+        if (!err && user) {
+          profileBtn.innerHTML = '<i class="fas fa-user"></i> Профиль';
+          profileBtn.className = 'profile-button';
+          profileBtn.addEventListener('click', function () {
+            window.location.href = 'profile.html';
+          });
+        } else {
+          profileBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Регистрация';
+          profileBtn.className = 'register-button';
+          profileBtn.addEventListener('click', function () {
+            window.location.href = 'register.html';
+          });
+        }
+      });
+
+      cartBtn.addEventListener('click', function () {
+        window.location.href = 'index.html#cart';
+      });
+
+      // Логика добавления адреса
+      const addAddressBtn = document.getElementById('addAddressBtn');
+      addAddressBtn.addEventListener('click', () => {
+        const city = document.getElementById('cityInput').value.trim();
+        const street = document.getElementById('streetInput').value.trim();
+        const house = document.getElementById('houseInput').value.trim();
+        const apartment = document.getElementById('apartmentInput').value.trim();
+
+        if (!city || !street || !house || !apartment) {
+          alert('Пожалуйста, заполните все поля.');
+          return;
+        }
+
+        const address = { city, street, house, apartment };
+        api.request(ADDRESSES_ENDPOINT, 'POST', address)
+          .then(() => {
+            alert('Адрес успешно добавлен!');
+            // Очищаем форму
+            document.getElementById('cityInput').value = '';
+            document.getElementById('streetInput').value = '';
+            document.getElementById('houseInput').value = '';
+            document.getElementById('apartmentInput').value = '';
+          })
+          .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Не удалось добавить адрес. Убедитесь, что вы авторизованы.');
+          });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+/* map.css */
+:root {
+    --primary-color: #ff6200;
+    --primary-dark: #e24e00;
+    --text-dark: #1a1a1a;
+    --text-light: #666;
+    --background-light: #ffffff;
+    --background-card: #ffffff;
+    --border-color: #e0e0e0;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Тёмная тема через data-theme */
+  :root[data-theme="dark"] {
+    --text-dark: #e0e0e0;
+    --text-light: #a0a0a0;
+    --background-light: #1e1e1e;
+    --background-card: #2a2a2a;
+    --border-color: #444;
+    --shadow-light: 0 2px 8px rgba(255, 255, 255, 0.05);
+    --shadow-medium: 0 4px 16px rgba(255, 255, 255, 0.1);
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  .container {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  .nav-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    background: var(--background-card);
+    padding: 15px 25px;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .nav-menu ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .nav-menu li {
+    margin-right: 30px;
+  }
+  
+  .nav-menu a {
+    text-decoration: none;
+    color: var(--text-light);
+    font-weight: 500;
+    font-size: 16px;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-menu a.active {
+    color: var(--primary-color);
+  }
+  
+  .nav-menu a:hover {
+    color: var(--primary-dark);
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .profile-button, .cart-button, .add-address-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary-color);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .profile-button:hover, .cart-button:hover, .add-address-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .register-button {
+    background-color: #4e60ff;
+  }
+  
+  .register-button:hover {
+    background-color: #3a4bff;
+  }
+  
+  .content {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  #map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  
+  .search-panel {
+    position: fixed;
+    top: 70px;
+    left: 20px;
+    width: 90%;
+    max-width: 500px;
+    padding: 15px;
+    background: var(--background-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-medium);
+    z-index: 10;
+  }
+  
+  #searchInput {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 25px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+    background: var(--background-card);
+    color: var(--text-dark);
+  }
+  
+  #searchInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(255, 98, 0, 0.3);
+  }
+  
+  #searchInput::placeholder {
+    color: var(--text-light);
+  }
+  
+  .search-results {
+    margin-top: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+    background: var(--background-card);
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .search-results div {
+    padding: 12px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-dark);
+    line-height: 1.4;
+  }
+  
+  .search-results div:hover {
+    background-color: rgba(255, 98, 0, 0.1);
+    color: var(--primary-color);
+  }
+  
+  .address-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .address-form h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+  }
+  
+  .address-form input {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    background: var(--background-card);
+    color: var(--text-dark);
+  }
+  
+  .address-form input:focus {
+    border-color: var(--primary-color);
+  }
+  
+  .address-form input::placeholder {
+    color: var(--text-light);
+  }
+  
+  .add-address-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-address-button:hover {
+    background: var(--primary-dark);
+  }
+  
+  @media screen and (max-width: 600px) {
+    .search-panel {
+      width: 85%;
+      padding: 10px;
+      left: 10px;
+    }
+    #searchInput {
+      padding: 10px 15px;
+      font-size: 14px;
+    }
+    .search-results {
+      max-height: 100px;
+    }
+    .search-results div {
+      font-size: 14px;
+      padding: 10px 15px;
+    }
+    .address-form h3 {
+      font-size: 1rem;
+    }
+    .address-form input {
+      font-size: 12px;
+      padding: 8px;
+    }
+    .add-address-button {
+      padding: 8px;
+      font-size: 14px;
+    }
+  }
