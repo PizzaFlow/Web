@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Любимые пиццы</title>
+  <link rel="stylesheet" href="../static/css/styles.css">
+  <link rel="stylesheet" href="../static/css/favorites.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="pizzas.html" class="nav-item">Пиццы</a></li>
+        <li><a href="addresses.html" class="nav-item">Адреса</a></li>
+        <li><a href="map.html" class="nav-item">Карта</a></li>
+        <li><a href="orders.html" class="nav-item">Мои заказы</a></li>
+        <li><a href="favorites.html" class="nav-item active">Любимые пиццы</a></li>
+      </ul>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="theme-toggle-button"><i class="fas fa-sun"></i> Тема</button>
+        <button id="profileBtn" class="profile-button"></button>
+        <button id="cartBtn" class="cart-button"><i class="fas fa-shopping-cart"></i> Корзина</button>
+      </div>
+    </nav>
+    <div id="content" class="content">
+      <h1>Любимые пиццы</h1>
+      <div id="favoritePizzasContainer" class="pizza-container"></div>
+    </div>
+  </div>
+
+  <script src="../static/js/ApiClient.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const api = new ApiClient();
+      const profileBtn = document.getElementById('profileBtn');
+      const cartBtn = document.getElementById('cartBtn');
+      const favoritePizzasContainer = document.getElementById('favoritePizzasContainer');
+      const FAVORITES_ENDPOINT = '/users/favorite-pizzas';
+
+      // Функция переключения темы
+      function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeButtonIcon(newTheme);
+      }
+
+      function updateThemeButtonIcon(theme) {
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        themeToggleBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-moon"></i> Тема' : '<i class="fas fa-sun"></i> Тема';
+      }
+
+      // Инициализация темы
+      const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeButtonIcon(savedTheme);
+
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.addEventListener('click', toggleTheme);
+
+      // Проверка авторизации
+      api.fetchCurrentUser((err, user) => {
+        if (!err && user) {
+          profileBtn.innerHTML = '<i class="fas fa-user"></i> Профиль';
+          profileBtn.className = 'profile-button';
+          profileBtn.addEventListener('click', () => {
+            window.location.href = 'profile.html';
+          });
+        } else {
+          profileBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Регистрация';
+          profileBtn.className = 'register-button';
+          profileBtn.addEventListener('click', () => {
+            window.location.href = 'register.html';
+          });
+        }
+      });
+
+      cartBtn.addEventListener('click', () => {
+        window.location.href = 'index.html#cart';
+      });
+
+      // Загружаем любимые пиццы через ApiClient
+      api.request(FAVORITES_ENDPOINT)
+        .then(pizzas => {
+          if (pizzas.length === 0) {
+            favoritePizzasContainer.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-heart empty-icon"></i>
+                <h3>Нет любимых пицц</h3>
+                <p>Добавьте пиццы в избранное, чтобы они отобразились здесь.</p>
+                <button class="primary-button" onclick="window.location.href='pizzas.html'">
+                  <i class="fas fa-pizza-slice"></i> Перейти к пиццам
+                </button>
+              </div>
+            `;
+            return;
+          }
+          pizzas.forEach((pizza, index) => {
+            const card = createPizzaCard(pizza);
+            card.style.animationDelay = `${index * 0.1}s`;
+            favoritePizzasContainer.appendChild(card);
+          });
+        })
+        .catch(error => {
+          console.error('Ошибка:', error);
+          favoritePizzasContainer.innerHTML = `
+            <div class="error-state">
+              <i class="fas fa-exclamation-triangle error-icon"></i>
+              <h3>Не удалось загрузить любимые пиццы</h3>
+              <p>Убедитесь, что вы авторизованы, или попробуйте обновить страницу.</p>
+              <button class="primary-button" onclick="window.location.reload()">
+                <i class="fas fa-sync-alt"></i> Обновить
+              </button>
+            </div>
+          `;
+        });
+
+      function createPizzaCard(pizza) {
+        const card = document.createElement('div');
+        card.className = 'pizza-card';
+        
+        const image = pizza.photo 
+          ? `<img src="${pizza.photo}" alt="${pizza.name}" loading="lazy">` 
+          : '<div class="no-image"><i class="fas fa-image"></i> Нет фото</div>';
+
+        card.innerHTML = `
+          <button class="favorite-button" data-pizza-id="${pizza.id}">
+            <i class="fas fa-heart"></i>
+          </button>
+          <div class="pizza-card-content">
+            ${image}
+            <h3>${pizza.name}</h3>
+            <div class="description">${pizza.description}</div>
+            <div class="price">от ${pizza.price} ₽</div>
+          </div>
+          <button class="select-button"><i class="fas fa-plus"></i> Выбрать</button>
+        `;
+
+        card.querySelector('.select-button').addEventListener('click', () => {
+          window.location.href = `pizzas.html#pizza-${pizza.id}`;
+        });
+
+        const favoriteBtn = card.querySelector('.favorite-button');
+        favoriteBtn.addEventListener('click', () => {
+          api.request(`${FAVORITES_ENDPOINT}/${pizza.id}`, 'DELETE')
+            .then(() => {
+              card.classList.add('fade-out');
+              setTimeout(() => {
+                card.remove();
+                if (!favoritePizzasContainer.children.length) {
+                  favoritePizzasContainer.innerHTML = `
+                    <div class="empty-state">
+                      <i class="fas fa-heart empty-icon"></i>
+                      <h3>Нет любимых пицц</h3>
+                      <p>Добавьте пиццы в избранное, чтобы они отобразились здесь.</p>
+                      <button class="primary-button" onclick="window.location.href='pizzas.html'">
+                        <i class="fas fa-pizza-slice"></i> Перейти к пиццам
+                      </button>
+                    </div>
+                  `;
+                }
+              }, 300);
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              alert('Не удалось удалить пиццу из избранного. Убедитесь, что вы авторизованы.');
+            });
+        });
+
+        return card;
+      }
+    });
+  </script>
+</body>
+</html>

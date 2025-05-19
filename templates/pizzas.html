@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Пиццы</title>
+  <link rel="stylesheet" href="../static/css/styles.css">
+  <link rel="stylesheet" href="../static/css/cart.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div id="overlay" class="overlay"></div>
+  <div class="container">
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="pizzas.html" class="nav-item active">Пиццы</a></li>
+        <li><a href="addresses.html" class="nav-item">Адреса</a></li>
+        <li><a href="map.html" class="nav-item">Карта</a></li>
+        <li><a href="orders.html" class="nav-item">Мои заказы</a></li>
+        <li><a href="favorites.html" class="nav-item">Любимые пиццы</a></li>
+      </ul>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="theme-toggle-button"><i class="fas fa-sun"></i> Тема</button>
+        <button id="profileBtn" class="profile-button"></button>
+        <button id="cartBtn" class="cart-button"><i class="fas fa-shopping-cart"></i> Корзина</button>
+      </div>
+    </nav>
+    <div id="content" class="content">
+      <div class="pizza-header">
+        <h1>Наше меню</h1>
+        <div class="pizza-filters">
+          <button class="filter-button active" data-filter="all">Все</button>
+          <button class="filter-button" data-filter="classic">Классические</button>
+          <button class="filter-button" data-filter="spicy">Острые</button>
+          <button class="filter-button" data-filter="vegetarian">Вегетарианские</button>
+        </div>
+      </div>
+      <div id="pizzaContainer" class="pizza-container"></div>
+    </div>
+  </div>
+
+  <!-- Модальное окно пиццы -->
+  <div id="pizzaModal" class="modal">
+    <div class="modal-content">
+      <span class="close">×</span>
+      <div class="modal-body">
+        <div class="modal-image">
+          <img id="modalPizzaImage" src="" alt="Pizza Image">
+        </div>
+        <div class="modal-details">
+          <div class="modal-header">
+            <h2 id="modalPizzaName"></h2>
+            <button id="favoriteModalBtn" class="favorite-button">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <p id="modalPizzaDescription" class="modal-description"></p>
+          <div class="modal-ingredients">
+            <h3>Состав:</h3>
+            <div id="modalPizzaIngredients" class="ingredients-list"></div>
+          </div>
+          <div class="modal-price-actions">
+            <div class="price-wrapper">
+              <span id="modalPizzaPrice" class="modal-price">0 ₽</span>
+              <span class="weight">~500 г</span>
+            </div>
+            <button id="addToCartBtn" class="add-to-cart-button">
+              <i class="fas fa-plus"></i> Добавить в корзину
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно корзины -->
+  <div id="cartModal" class="cart-modal">
+    <div class="cart-content">
+      <span class="close">×</span>
+      <h3>Корзина</h3>
+      <div class="cart-header">
+        <span id="cartCount">0 товара</span>
+        <span id="cartTotalHeader">на 0 ₽</span>
+      </div>
+      <div id="cartItems" class="cart-items"></div>
+      <div class="cart-footer">
+        <div class="cart-total">Сумма заказа: <span id="cartTotal">0 ₽</span></div>
+        <button id="checkoutBtn" class="checkout-button">
+          <i class="fas fa-credit-card"></i> К оформлению заказа
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/js/ApiClient.js"></script>
+  <script src="../static/js/cart.js"></script>
+  <script src="../static/js/script.js"></script>
+  <script>
+    // Функция переключения темы
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeButtonIcon(newTheme);
+    }
+
+    function updateThemeButtonIcon(theme) {
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-moon"></i> Тема' : '<i class="fas fa-sun"></i> Тема';
+    }
+
+    // Инициализация темы при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeButtonIcon(savedTheme);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        updateThemeButtonIcon('dark');
+      }
+
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.addEventListener('click', toggleTheme);
+
+      const api = new ApiClient();
+      const profileBtn = document.getElementById('profileBtn');
+      const cartBtn = document.getElementById('cartBtn');
+
+      // Проверка авторизации
+      api.fetchCurrentUser((err, user) => {
+        if (!err && user) {
+          profileBtn.innerHTML = '<i class="fas fa-user"></i> Профиль';
+          profileBtn.className = 'profile-button';
+          profileBtn.addEventListener('click', () => {
+            window.location.href = 'profile.html';
+          });
+        } else {
+          profileBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Регистрация';
+          profileBtn.className = 'register-button';
+          profileBtn.addEventListener('click', () => {
+            window.location.href = 'register.html';
+          });
+        }
+      });
+
+      // Открытие корзины
+      cartBtn.addEventListener('click', () => {
+        const cartModal = document.getElementById('cartModal');
+        cartModal.classList.add('open');
+        document.getElementById('overlay').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      });
+
+      // Закрытие модальных окон
+      document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', () => {
+          document.getElementById('pizzaModal').classList.remove('open');
+          document.getElementById('cartModal').classList.remove('open');
+          document.getElementById('overlay').style.display = 'none';
+          document.body.style.overflow = 'auto';
+        });
+      });
+
+      // Клик по оверлею
+      document.getElementById('overlay').addEventListener('click', () => {
+        document.getElementById('pizzaModal').classList.remove('open');
+        document.getElementById('cartModal').classList.remove('open');
+        document.getElementById('overlay').style.display = 'none';
+        document.body.style.overflow = 'auto';
+      });
+
+      // Фильтрация пицц
+      const filterButtons = document.querySelectorAll('.filter-button');
+      filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          filterButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          const filter = button.getAttribute('data-filter');
+          filterPizzas(filter);
+        });
+      });
+
+      function filterPizzas(filter) {
+        const pizzaCards = document.querySelectorAll('.pizza-card');
+        pizzaCards.forEach(card => {
+          const category = card.getAttribute('data-category') || 'all';
+          if (filter === 'all' || category === filter) {
+            card.style.display = 'block';
+            card.classList.add('slide-in');
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

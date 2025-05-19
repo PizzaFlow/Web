@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../static/css/profile.css">
+</head>
+<body>
+  <div class="profile-container">
+    <h2><i class="fas fa-user-circle"></i> Профиль пользователя</h2>
+    <div id="profileError" class="error"></div>
+    <div class="profile-form">
+      <div class="profile-field">
+        <label for="profileEmail"><i class="fas fa-envelope"></i> Email</label>
+        <input type="email" id="profileEmail" readonly>
+      </div>
+      <div class="profile-field">
+        <label for="profileUsername"><i class="fas fa-user"></i> Имя пользователя</label>
+        <input type="text" id="profileUsername">
+      </div>
+      <div class="profile-field">
+        <label for="profilePhone"><i class="fas fa-phone"></i> Телефон</label>
+        <input type="tel" id="profilePhone" placeholder="Введите номер телефона">
+      </div>
+      <div class="profile-field">
+        <label for="profilePassword"><i class="fas fa-lock"></i> Новый пароль</label>
+        <input type="password" id="profilePassword" placeholder="Оставьте пустым, если не хотите менять">
+      </div>
+      <div class="button-group">
+        <button id="saveProfileBtn"><i class="fas fa-save"></i> Сохранить изменения</button>
+        <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/js/ApiClient.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const api = new ApiClient();
+      const profileError = document.getElementById('profileError');
+      const profileEmail = document.getElementById('profileEmail');
+      const profileUsername = document.getElementById('profileUsername');
+      const profilePhone = document.getElementById('profilePhone');
+      const profilePassword = document.getElementById('profilePassword');
+      const saveProfileBtn = document.getElementById('saveProfileBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      // Загрузка данных пользователя
+      api.fetchCurrentUser((err, user) => {
+        if (err) {
+          profileError.textContent = err.message || 'Ошибка загрузки профиля';
+          profileError.style.display = 'block';
+          return;
+        }
+        profileEmail.value = user.email;
+        profileUsername.value = user.username || '';
+        profilePhone.value = user.phone_number || '';
+      });
+
+      // Сохранение изменений
+      saveProfileBtn.addEventListener('click', () => {
+        const updatedData = {
+          username: profileUsername.value || undefined,
+          phone_number: profilePhone.value || undefined,
+          password: profilePassword.value || undefined
+        };
+
+        api.updateUserProfile(updatedData, (err, updatedUser) => {
+          if (err) {
+            profileError.textContent = err.message || 'Ошибка обновления профиля';
+            profileError.style.display = 'block';
+          } else {
+            profileError.textContent = 'Профиль успешно обновлен!';
+            profileError.style.display = 'block';
+            profileError.style.color = 'green';
+            setTimeout(() => {
+              profileError.style.display = 'none';
+            }, 3000);
+            if (updatedUser.username) profileUsername.value = updatedUser.username;
+            if (updatedUser.phone_number) profilePhone.value = updatedUser.phone_number;
+            profilePassword.value = ''; // Очищаем поле пароля после успешного обновления
+          }
+        });
+      });
+
+      // Выход
+      logoutBtn.addEventListener('click', () => {
+        api.logout();
+        window.location.href = 'login.html';
+      });
+    });
+  </script>
+</body>
+</html>
