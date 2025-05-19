@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Адреса</title>
+  <link rel="stylesheet" href="../static/css/styles.css">
+  <link rel="stylesheet" href="../static/css/addresses.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="pizzas.html" class="nav-item">Пиццы</a></li>
+        <li><a href="addresses.html" class="nav-item active">Адреса</a></li>
+        <li><a href="map.html" class="nav-item">Карта</a></li>
+        <li><a href="orders.html" class="nav-item">Мои заказы</a></li>
+        <li><a href="favorites.html" class="nav-item">Любимые пиццы</a></li>
+      </ul>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="theme-toggle-button"><i class="fas fa-sun"></i> Тема</button>
+        <button id="profileBtn" class="profile-button"></button>
+        <button id="cartBtn" class="cart-button"><i class="fas fa-shopping-cart"></i> Корзина</button>
+      </div>
+    </nav>
+    <div id="content" class="content">
+      <div class="header-wrapper">
+        <h1>Мои адреса</h1>
+        <button id="addAddressBtn" class="add-address-button">
+          <i class="fas fa-plus"></i> Добавить адрес
+        </button>
+      </div>
+      <div id="addressContainer" class="address-container">
+        <!-- Адреса будут загружены здесь -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/js/ApiClient.js"></script>
+  <script>
+    // Функция переключения темы
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeButtonIcon(newTheme);
+    }
+
+    function updateThemeButtonIcon(theme) {
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-moon"></i> Тема' : '<i class="fas fa-sun"></i> Тема';
+    }
+
+    // Инициализация темы при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeButtonIcon(savedTheme);
+
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      themeToggleBtn.addEventListener('click', toggleTheme);
+
+      const api = new ApiClient();
+      const profileBtn = document.getElementById('profileBtn');
+      const cartBtn = document.getElementById('cartBtn');
+      const addAddressBtn = document.getElementById('addAddressBtn');
+      const addressContainer = document.getElementById('addressContainer');
+      const ADDRESSES_ENDPOINT = '/users/address';
+
+      // Проверка авторизации
+      api.fetchCurrentUser((err, user) => {
+        if (!err && user) {
+          profileBtn.innerHTML = '<i class="fas fa-user"></i> Профиль';
+          profileBtn.className = 'profile-button';
+          profileBtn.addEventListener('click', () => {
+            window.location.href = 'profile.html';
+          });
+        } else {
+          profileBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Регистрация';
+          profileBtn.className = 'register-button';
+          profileBtn.addEventListener('click', () => {
+            window.location.href = 'register.html';
+          });
+        }
+      });
+
+      cartBtn.addEventListener('click', () => {
+        window.location.href = 'index.html#cart';
+      });
+
+      addAddressBtn.addEventListener('click', () => {
+        window.location.href = 'map.html?addAddress=true';
+      });
+
+      // Загружаем адреса
+      api.request(ADDRESSES_ENDPOINT)
+        .then(addresses => {
+          if (addresses.length === 0) {
+            addressContainer.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-map-marker-alt empty-icon"></i>
+                <h3>Нет сохранённых адресов</h3>
+                <p>Добавьте адрес, чтобы мы знали, куда доставлять ваши заказы</p>
+                <button class="primary-button" onclick="window.location.href='map.html?addAddress=true'">
+                  <i class="fas fa-plus"></i> Добавить адрес
+                </button>
+              </div>
+            `;
+            return;
+          }
+          
+          // Сортируем адреса: выбранный первый, остальные по алфавиту
+          const selectedAddressId = localStorage.getItem('selectedAddressId');
+          addresses.sort((a, b) => {
+            if (selectedAddressId && Number(selectedAddressId) === a.id) return -1;
+            if (selectedAddressId && Number(selectedAddressId) === b.id) return 1;
+            return a.street.localeCompare(b.street);
+          });
+
+          addresses.forEach((address, index) => {
+            const card = createAddressCard(address);
+            card.style.animationDelay = `${index * 0.1}s`;
+            addressContainer.appendChild(card);
+          });
+        })
+        .catch(error => {
+          console.error('Ошибка:', error);
+          addressContainer.innerHTML = `
+            <div class="error-state">
+              <i class="fas fa-exclamation-triangle error-icon"></i>
+              <h3>Не удалось загрузить адреса</h3>
+              <p>Попробуйте обновить страницу или проверьте соединение</p>
+              <button class="primary-button" onclick="window.location.reload()">
+                <i class="fas fa-sync-alt"></i> Обновить
+              </button>
+            </div>
+          `;
+        });
+
+      function createAddressCard(address) {
+        const card = document.createElement('div');
+        card.className = 'address-card';
+        const selectedAddressId = localStorage.getItem('selectedAddressId');
+        if (selectedAddressId && Number(selectedAddressId) === address.id) {
+          card.classList.add('selected-address');
+        }
+
+        const fullAddress = `${address.city}, ул. ${address.street}, д. ${address.house}, кв. ${address.apartment}`;
+        card.innerHTML = `
+          <div class="address-main">
+            <button class="select-circle">
+              <i class="fas fa-check"></i>
+            </button>
+            <div class="address-details">
+              <span class="address-info">${fullAddress}</span>
+              <span class="address-label">${selectedAddressId && Number(selectedAddressId) === address.id ? 'Основной адрес' : ''}</span>
+            </div>
+          </div>
+          <div class="address-actions">
+            <button class="edit-button" title="Редактировать"><i class="fas fa-edit"></i></button>
+            <button class="delete-button" title="Удалить"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        `;
+
+        // Кружок для выбора адреса
+        const selectCircle = card.querySelector('.select-circle');
+        selectCircle.addEventListener('click', () => {
+          localStorage.setItem('selectedAddressId', address.id);
+          document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected-address'));
+          card.classList.add('selected-address');
+          
+          // Обновляем label
+          card.querySelector('.address-label').textContent = 'Основной адрес';
+          document.querySelectorAll('.address-card').forEach(otherCard => {
+            if (otherCard !== card) {
+              otherCard.querySelector('.address-label').textContent = '';
+            }
+          });
+        });
+
+        // Кнопка редактирования адреса
+        const editBtn = card.querySelector('.edit-button');
+        editBtn.addEventListener('click', () => {
+          window.location.href = `map.html?editAddress=true&id=${address.id}`;
+        });
+
+        // Кнопка удаления адреса
+        const deleteBtn = card.querySelector('.delete-button');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm('Вы уверены, что хотите удалить этот адрес?')) {
+            api.request(`${ADDRESSES_ENDPOINT}/${address.id}`, 'DELETE')
+              .then(() => {
+                card.classList.add('fade-out');
+                setTimeout(() => {
+                  card.remove();
+                  if (selectedAddressId && Number(selectedAddressId) === address.id) {
+                    localStorage.removeItem('selectedAddressId');
+                  }
+                  if (!addressContainer.querySelector('.address-card')) {
+                    addressContainer.innerHTML = `
+                      <div class="empty-state">
+                        <i class="fas fa-map-marker-alt empty-icon"></i>
+                        <h3>Нет сохранённых адресов</h3>
+                        <p>Добавьте адрес, чтобы мы знали, куда доставлять ваши заказы</p>
+                        <button class="primary-button" onclick="window.location.href='map.html?addAddress=true'">
+                          <i class="fas fa-plus"></i> Добавить адрес
+                        </button>
+                      </div>
+                    `;
+                  }
+                }, 300);
+              })
+              .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось удалить адрес. Попробуйте позже.');
+              });
+          }
+        });
+
+        return card;
+      }
+    });
+  </script>
+</body>
+</html>
