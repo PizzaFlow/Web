@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мои заказы</title>
+  <link rel="stylesheet" href="../static/css/styles.css">
+  <link rel="stylesheet" href="../static/css/orders.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="pizzas.html" class="nav-item">Пиццы</a></li>
+        <li><a href="addresses.html" class="nav-item">Адреса</a></li>
+        <li><a href="map.html" class="nav-item">Карта</a></li>
+        <li><a href="orders.html" class="nav-item active">Мои заказы</a></li>
+        <li><a href="favorites.html" class="nav-item">Любимые пиццы</a></li>
+      </ul>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="theme-toggle-button"><i class="fas fa-sun"></i> Тема</button>
+        <button id="profileBtn" class="profile-button"></button>
+        <button id="cartBtn" class="cart-button"><i class="fas fa-shopping-cart"></i> Корзина</button>
+      </div>
+    </nav>
+    <div id="content" class="content">
+      <h1>Мои заказы</h1>
+      <div id="ordersContainer" class="orders-container"></div>
+    </div>
+  </div>
+
+  <script src="../static/js/ApiClient.js"></script>
+  <script src="../static/js/orders.js"></script>
+</body>
+</html>

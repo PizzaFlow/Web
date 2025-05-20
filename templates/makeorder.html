@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оформление заказа</title>
+  <link rel="stylesheet" href="../static/css/styles.css">
+  <link rel="stylesheet" href="../static/css/makeorder.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="pizzas.html" class="nav-item">Пиццы</a></li>
+        <li><a href="addresses.html" class="nav-item">Адреса</a></li>
+        <li><a href="map.html" class="nav-item">Карта</a></li>
+        <li><a href="orders.html" class="nav-item">Мои заказы</a></li>
+        <li><a href="favorites.html" class="nav-item">Любимые пиццы</a></li>
+      </ul>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="theme-toggle-button"><i class="fas fa-sun"></i> Тема</button>
+        <button id="profileBtn" class="profile-button"></button>
+        <button id="cartBtn" class="cart-button"><i class="fas fa-shopping-cart"></i> Корзина</button>
+      </div>
+    </nav>
+    <div id="content" class="content">
+      <h1>Оформление заказа</h1>
+      <div id="orderError" class="error"></div>
+      <div id="orderForm" class="order-form">
+        <div class="order-section">
+          <h3><i class="fas fa-map-marker-alt"></i> Адрес доставки</h3>
+          <select id="addressSelect">
+            <option value="">Выберите адрес</option>
+          </select>
+          <button id="addAddressBtn" class="add-address-button">
+            <i class="fas fa-plus"></i> Добавить адрес
+          </button>
+        </div>
+        <div class="order-section">
+          <h3><i class="fas fa-clock"></i> Время доставки</h3>
+          <select id="deliveryTimeSelect">
+            <option value="">Выберите время</option>
+          </select>
+        </div>
+        <div class="order-section">
+          <h3><i class="fas fa-credit-card"></i> Способ оплаты</h3>
+          <div class="payment-methods">
+            <label>
+              <input type="radio" name="paymentMethod" value="Картой при получении" checked>
+              Картой при получении
+            </label>
+            <label>
+              <input type="radio" name="paymentMethod" value="Наличными при получении">
+              Наличными при получении
+            </label>
+          </div>
+        </div>
+        <div class="order-section">
+          <h3><i class="fas fa-pizza-slice"></i> Ваш заказ</h3>
+          <div id="cartItems" class="cart-items"></div>
+          <div id="totalPrice" class="total-price"></div>
+        </div>
+        <button id="submitOrderBtn" class="primary-button">
+          <i class="fas fa-check"></i> Оформить заказ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/js/ApiClient.js"></script>
+  <script src="../static/js/makeorder.js"></script>
+</body>
+</html>
